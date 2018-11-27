@@ -38,12 +38,13 @@ conn.select_folder('INBOX', readonly=True)
 # print("邮件ID列表：", result_all)
 # 获取INBOX中的所有未读邮件ID
 result_unseen = conn.search('UNSEEN')
-print("未读邮件ID列表", result_unseen)
+# print("未读邮件ID列表", result_unseen)
 # # 获取INBOX中的所有发件人为"bug@ops.orderplus.com"的未读邮件ID列表
 # result_unseen = conn.search()
 # print("bug未读邮件ID列表", result_unseen)
 
 # 4. 根据Email ID获取邮件内容
+file_path = '/Users/zhanglinquan/Desktop/bugs.txt'
 if len(result_unseen):
     for email_id in result_unseen:
         # print(email_id)
@@ -56,7 +57,7 @@ if len(result_unseen):
         # print(type(mailbody))  # bytes
         # print(chardet.detect(mailbody))  # {'encoding': 'ascii', 'confidence': 1.0, 'language': ''}
 
-        # 从mailbody中使用email获取message对象
+        # 从mailbody中使用email获取Message对象
         message = email.message_from_bytes(mailbody)
         # print(type(message))  # email.message.Message
         # 从message对象中解析出subject，from等
@@ -71,9 +72,6 @@ if len(result_unseen):
         # print("Subject:", dh[0][0].decode("utf-8", "ignore"))  # Subject: 【监控系统报告】Orderplus-Client【beta】预警
 
     # 5. 获取邮件内容并转为utf-8,保存到文件中
-        # 当前时间的时间戳
-        now_time = int(time.time())
-
         if send_from == 'bug@ops.orderplus.com':
             for part in message.walk():
                 # print(part)
@@ -85,16 +83,14 @@ if len(result_unseen):
                 # print('*' * 180)
 
                 # 将结果全部记录到一个文件中
-                file_handle = open('/Users/zhanglinquan/Desktop/bugs.txt', mode='a')
+                file_handle = open(file_path, mode='a')
                 file_handle.write(is_read)
 
                 file_handle.close()
-
-
 # 6. 从bugs.txt中分析数据
 # 6.1. 读取bugs.txt文件内容
-if os.path.exists('/Users/zhanglinquan/Desktop/bugs.txt'):
-    file_handle = open('/Users/zhanglinquan/Desktop/bugs.txt', mode='r')
+if os.path.exists(file_path):
+    file_handle = open(file_path, mode='r')
     contents = file_handle.readlines()
     bug_list = []
     # print(contents)
@@ -110,10 +106,13 @@ if os.path.exists('/Users/zhanglinquan/Desktop/bugs.txt'):
             # print('*' * 180)
 
     # print(bug_list)
-    count = Counter(bug_list)
-    print(dict(count))
+    # 统计List中每个元素出现的次数
+    counts = Counter(bug_list)
+    for kv in dict(counts).items():
+        print(kv)
 
-    os.remove('/Users/zhanglinquan/Desktop/bugs.txt')
+    # 统计完成后，删除文件
+    os.remove(file_path)
 
 
 
